@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/build-iso.yml"
       - "custom-os-build/**"
+  repository_dispatch:
+    types: [build-iso]
   workflow_dispatch:
 
 permissions:
