@@ -1,0 +1,27 @@
+name: Build NEXUS OS ISO
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Build Docker image
+      run: docker build -t nexus-os-builder .
+    - name: Build ISO
+      run: |
+        mkdir -p output
+        docker run --rm -v "$(pwd)/output:/output" nexus-os-builder
+    - name: Upload ISO artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nexus-os-iso
+        path: output/nexus-os.iso
