@@ -50,7 +50,7 @@ chroot "$CHROOT_DIR" /usr/bin/env DEBIAN_FRONTEND=noninteractive bash -euc '
     apt-get install -y --no-install-recommends \
         linux-generic casper systemd-sysv network-manager net-tools sudo \
         vim-tiny nano curl wget git \
-        xserver-xorg lightdm xfce4 xfce4-terminal dbus-x11 \
+        xserver-xorg lightdm xfce4 xfce4-terminal dbus-x11 plymouth \
         pulseaudio alsa-utils openssh-server ufw apparmor apparmor-utils \
         auditd rsyslog chrony tor \
         nmap sqlmap aircrack-ng wireshark tcpdump john hashcat binwalk \
@@ -89,7 +89,7 @@ cp "$kernel" "$ISO_DIR/casper/vmlinuz"
 cp "$initrd" "$ISO_DIR/casper/initrd"
 
 cleanup_mounts
-mksquashfs "$CHROOT_DIR" "$ISO_DIR/casper/filesystem.squashfs" -comp xz -noappend -e dev proc run sys tmp
+mksquashfs "$CHROOT_DIR" "$ISO_DIR/casper/filesystem.squashfs" -comp xz -noappend
 du -sx --block-size=1 "$CHROOT_DIR" | cut -f1 > "$ISO_DIR/casper/filesystem.size"
 
 cat > "$ISO_DIR/boot/grub/grub.cfg" <<'GRUB'
