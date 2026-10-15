@@ -31,9 +31,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /build
 
 COPY scripts/ /build/scripts/
-COPY configs/ /build/configs/
-COPY branding/ /build/branding/
 
 RUN chmod +x /build/scripts/*.sh
 
-ENTRYPOINT ["/build/scripts/build.sh"]
+ENTRYPOINT ["/build/scripts/build-live-iso.sh"]

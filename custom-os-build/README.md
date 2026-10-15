@@ -1,68 +1,31 @@
-# NEXUS OS - Custom Linux Distribution
+# NEXUS OS
 
-A security-focused Linux distribution combining Ubuntu, Kali Linux, and Termux tooling.
+NEXUS OS is an Ubuntu 24.04 live image with an XFCE desktop and a focused set of network, development, and security tools. The build creates a hybrid BIOS/UEFI ISO; it does not install to a disk or configure all system traffic to use Tor.
 
-## Features
+## Build Locally
 
-- Ubuntu 24.04 base with Kali Linux security tools
-- Tor network routing (all traffic through Tor)
-- Network monitoring for data exfiltration detection
-- Security hardening (kernel, SSH, firewall, AppArmor, audit)
-- XFCE desktop environment
-- Custom bootloader and branding
-- Pre-installed development tools
+Requirements: Docker, at least 20 GB of free disk space, and 4 GB of memory for a VM.
 
-## Requirements
+From the repository root:
 
-- Docker Desktop for Windows (or any Docker-capable system)
-- 20GB free disk space
-- 4GB RAM minimum
-
-## Building
-
-1. Install Docker Desktop
-2. Open PowerShell in this directory
-3. Run:
-
-```powershell
-docker build -t nexus-os-builder .
-docker run --rm -v "${PWD}\output:/output" nexus-os-builder
+```sh
+docker build -t nexus-os-builder ./custom-os-build
+mkdir -p custom-os-build/output
+docker run --rm --privileged \
+	-v "$PWD/custom-os-build/output:/output" \
+	nexus-os-builder
 ```
 
-The ISO will be in `output\nexus-os.iso`
+The ISO is written to `custom-os-build/output/nexus-os.iso`. The build container needs mount capabilities to configure a temporary chroot. The builder packages the ISO without installing GRUB to a host disk.
 
-## Usage
+## GitHub Actions
 
-- Burn the ISO to USB with Rufus or balenaEtcher
-- Boot from USB
-- Default user: `nexus` / password: `nexus`
-- Change password immediately after first login
+The `Build NEXUS OS ISO` workflow builds the image, boots it in QEMU through the graphical login, and uploads `nexus-os-iso` as a seven-day artifact. Start it from the repository's Actions tab or with `workflow_dispatch`.
 
-## Security Tools Included
+## Live Session Tools
 
-- Metasploit, Nmap, Burp Suite, SQLmap
-- Aircrack-ng, John the Ripper, Hashcat
-- Wireshark, Tcpdump, Volatility
-- chkrootkit, rkhunter, Lynis
-- Firejail, Flatpak, Snap
+- `network-monitor` runs the included network checks.
+- `nexus-hardening` applies system hardening and should only be run after reviewing its system-wide changes.
+- `tor-routing` configures Tor services; it does not run automatically in the live session.
 
-## Tor Commands
-
-- `tor-check` - Verify Tor connection
-- `tor-change-ip` - Get new Tor IP
-- `network-monitor` - Run security scan
-- `nexus-hardening` - Run security hardening
-
-## Network Monitor
-
-Run `network-monitor` regularly to detect:
-- Hidden connections
-- Data exfiltration attempts
-- Suspicious DNS queries
-- Promiscuous mode interfaces
-- Hidden processes
-- Suspicious kernel modules
-
-## Legal Notice
-
-This OS is for authorized security testing and education only.
+This image is for authorized security testing and education. The ISO has a live session and is not an installer.

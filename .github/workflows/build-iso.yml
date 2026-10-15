@@ -1,0 +1,63 @@
+name: Build NEXUS OS ISO
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-iso.yml"
+      - "custom-os-build/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ISO builder image
+        run: docker build -t nexus-os-builder ./custom-os-build
+
+      - name: Build live ISO
+        run: |
+          mkdir -p output
+          docker run --rm --privileged -v "$PWD/output:/output" nexus-os-builder
+
+      - name: Install QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86
+
+      - name: Boot ISO to graphical login
+        run: |
+          set +e
+          timeout 360s qemu-system-x86_64 \
+            -machine accel=tcg \
+            -m 4096 \
+            -smp 2 \
+            -cdrom output/nexus-os.iso \
+            -boot d \
+            -nographic \
+            -no-reboot \
+            -no-shutdown > qemu.log 2>&1
+          qemu_status=$?
+          set -e
+          if ! grep -Eq "Started .*Light Display Manager|Reached target Graphical Interface" qemu.log; then
+            tail -n 120 qemu.log
+            echo "ISO did not reach the graphical login (QEMU exit: $qemu_status)" >&2
+            exit 1
+          fi
+          echo "ISO reached the graphical login in QEMU."
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-os-iso
+          path: output/nexus-os.iso
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
