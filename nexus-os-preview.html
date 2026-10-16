@@ -143,10 +143,19 @@
       background:rgba(139,165,201,.16); color:#c5d5e7; font-size:12px; font-weight:700;
       letter-spacing:.04em; margin-bottom:12px;
     }
+    .store-symbol svg { width:20px; height:20px; }
     .store-card h3 { margin:0; font-size:14px; font-weight:600; }
     .store-card p { flex:1; margin:6px 0 14px; color:var(--muted); font-size:12px; line-height:1.45; }
     .store-link { color:#b6cce4; font-size:12px; text-decoration:none; }
     .store-link:hover { color:#fff; text-decoration:underline; }
+    .package-list { display:grid; gap:8px; margin:16px 0; }
+    .package-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 13px; border:1px solid var(--border); border-radius:7px; background:rgba(255,255,255,.025); }
+    .package-row strong { font-size:12px; font-weight:600; }
+    .package-row small { display:block; margin-top:3px; color:var(--muted); font-size:11px; }
+    .package-status { color:#9bc9aa; font-size:11px; white-space:nowrap; }
+    .install-command { display:flex; gap:8px; align-items:center; margin-top:14px; }
+    .install-command input { flex:1; min-width:0; padding:9px 10px; border:1px solid var(--border); border-radius:6px; color:var(--text); background:rgba(0,0,0,.22); }
+    .reality-note { padding:12px 14px; border-left:2px solid var(--accent); background:rgba(139,165,201,.08); color:var(--muted); font-size:12px; line-height:1.5; }
     .terminal {
       height:100%; min-height:220px; padding:2px; background:#0c111a; color:#c5f6e7;
       font:13px/1.65 "Cascadia Code", Consolas, monospace;
@@ -238,6 +247,8 @@
     <symbol id="i-editor" viewBox="0 0 24 24"><path d="M6 3.8h8l4 4v12.4H6a2 2 0 0 1-2-2V5.8a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4v4h4M8 12h7m-7 3h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="m14 18 5.5-5.5 2 2L16 20h-2v-2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
     <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m19.2 13.8 1.1.9-1.8 3.1-1.4-.5a7.8 7.8 0 0 1-1.6.9l-.3 1.5h-3.6l-.3-1.5a7.8 7.8 0 0 1-1.6-.9l-1.4.5-1.8-3.1 1.1-.9a7.7 7.7 0 0 1 0-1.8l-1.1-.9 1.8-3.1 1.4.5a7.8 7.8 0 0 1 1.6-.9l.3-1.5h3.6l.3 1.5a7.8 7.8 0 0 1 1.6.9l1.4-.5 1.8 3.1-1.1.9a7.7 7.7 0 0 1 0 1.8Z" transform="translate(-.2 -1.6) scale(.94)" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
     <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9h16l-1 11H5L4 9Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 9a4 4 0 0 1 8 0M9 13h.01m6-.01h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-browser" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9h17M8 3.8c2.5 2.8 3.1 5.5 3.1 8.2s-.6 5.4-3.1 8.2M16 3.8c-2.5 2.8-3.1 5.5-3.1 8.2s.6 5.4 3.1 8.2" fill="none" stroke="currentColor" stroke-width="1.25"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="m12 3 8 4.2v9.6L12 21l-8-4.2V7.2L12 3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m4.4 7.4 7.6 4 7.6-4M12 11.5V21M8 5.1l8 4.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
     <symbol id="i-about" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5m0-8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
     <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4v13H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4v4h4M8 12h7m-7 3h7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
     <symbol id="i-network" viewBox="0 0 24 24"><path d="M3 9a13 13 0 0 1 18 0M6.5 12.5a8 8 0 0 1 11 0M10 16a3 3 0 0 1 4 0m-2 3h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
@@ -262,9 +273,10 @@
     <section class="desktop-icons" aria-label="Desktop shortcuts">
       <button class="desktop-icon" data-app="files"><svg class="glyph"><use href="#i-folder"></use></svg><span>Files</span></button>
       <button class="desktop-icon" data-app="terminal"><svg class="glyph"><use href="#i-terminal"></use></svg><span>Terminal</span></button>
+      <button class="desktop-icon" data-app="software"><svg class="glyph"><use href="#i-package"></use></svg><span>Software</span></button>
       <button class="desktop-icon" data-app="editor"><svg class="glyph"><use href="#i-editor"></use></svg><span>Text Editor</span></button>
       <button class="desktop-icon" data-app="settings"><svg class="glyph"><use href="#i-settings"></use></svg><span>Settings</span></button>
-      <button class="desktop-icon" data-app="stores"><svg class="glyph"><use href="#i-store"></use></svg><span>App Stores</span></button>
+      <button class="desktop-icon" data-app="stores"><svg class="glyph"><use href="#i-store"></use></svg><span>App Catalogs</span></button>
       <button class="desktop-icon" data-app="about"><svg class="glyph"><use href="#i-about"></use></svg><span>About NEXUS</span></button>
     </section>
 
@@ -298,9 +310,11 @@
       <span class="task-separator"></span>
       <button class="task-app" data-app="files" title="Files"><svg><use href="#i-folder"></use></svg></button>
       <button class="task-app" data-app="terminal" title="Terminal"><svg><use href="#i-terminal"></use></svg></button>
+      <button class="task-app" data-app="browser" title="Web Browser"><svg><use href="#i-browser"></use></svg></button>
+      <button class="task-app" data-app="software" title="Software Manager"><svg><use href="#i-package"></use></svg></button>
       <button class="task-app" data-app="editor" title="Text Editor"><svg><use href="#i-editor"></use></svg></button>
       <button class="task-app" data-app="settings" title="Settings"><svg><use href="#i-settings"></use></svg></button>
-      <button class="task-app" data-app="stores" title="App Stores"><svg><use href="#i-store"></use></svg></button>
+      <button class="task-app" data-app="stores" title="App Catalogs"><svg><use href="#i-store"></use></svg></button>
       <div class="task-right"><span class="tray-item" title="Network"><svg><use href="#i-network"></use></svg></span><span class="tray-item" title="Volume"><svg><use href="#i-volume"></use></svg></span><span class="tray-item" title="Battery"><svg><use href="#i-battery"></use></svg></span></div>
     </div>
     <div id="toast" class="notification" hidden></div>
@@ -310,9 +324,11 @@
       const apps = {
         files: { title: "File Manager", icon: "folder" },
         terminal: { title: "Terminal", icon: "terminal" },
+        browser: { title: "Web Browser", icon: "browser" },
+        software: { title: "Software Manager", icon: "package" },
         editor: { title: "Text Editor", icon: "editor" },
         settings: { title: "Settings", icon: "settings" },
-        stores: { title: "App Stores", icon: "store" },
+        stores: { title: "App Catalogs", icon: "store" },
         about: { title: "About NEXUS OS", icon: "about" }
       };
       const win = document.getElementById("app-window");
@@ -361,6 +377,7 @@
         content.innerHTML = appContent(name);
         if (name === "files") setupFiles();
         if (name === "terminal") setupTerminal();
+        if (name === "software") setupSoftware();
         if (name === "settings") setupSettings();
         if (name === "editor") setupEditor();
       }
@@ -370,6 +387,17 @@
           <div class="toolbar"><button class="toolbutton" id="back" title="Back">‹</button><button class="toolbutton" id="forward" title="Forward">›</button><div class="address">/home/nexus</div><button class="toolbutton" id="new-folder">＋ New folder</button></div>
           <div class="file-grid" id="file-grid"></div><div class="status" id="file-status"></div>`;
         if (name === "terminal") return `<div class="terminal"><div class="terminal-output" id="terminal-output">NEXUS Terminal · Preview shell (simulated)<br>Type <b>help</b> to see available demo commands.<br><br></div><label class="terminal-line"><span class="prompt">nexus@nexus:~$</span><input id="terminal-input" autocomplete="off" spellcheck="false" autofocus></label></div>`;
+        if (name === "browser") return `<h2 style="font-size:18px;font-weight:500;margin:0 0 8px">Web Browser</h2><p class="store-intro">The real live image includes Epiphany. In this preview, open a destination in a new browser tab.</p><div class="store-grid">
+          <article class="store-card"><div class="store-symbol">${icon("nexus")}</div><h3>NEXUS OS Releases</h3><p>Download the latest published live image and checksum parts.</p><a class="store-link" href="https://github.com/BloxdMini/The-Main-OS/releases/latest" target="_blank" rel="noopener noreferrer">Open latest release ↗</a></article>
+          <article class="store-card"><div class="store-symbol">WEB</div><h3>App Catalogs</h3><p>Visit Google Play, Apple App Store, and Microsoft Store websites.</p><button class="toolbutton" type="button" data-launch-app="stores">Browse catalogs</button></article>
+          <article class="store-card"><div class="store-symbol">OS</div><h3>Ubuntu Software</h3><p>Install Linux packages in the real OS with Synaptic or apt.</p><button class="toolbutton" type="button" data-launch-app="software">Open software guide</button></article>
+          </div>`;
+        if (name === "software") return `<h2 style="font-size:18px;font-weight:500;margin:0 0 8px">Ubuntu Software</h2><p class="store-intro">The real NEXUS live image includes Synaptic Package Manager and apt. The list below reflects selected image tools; the browser preview cannot inspect or install packages.</p><div class="package-list">
+          <div class="package-row"><div><strong>Epiphany</strong><small>Web browser · epiphany-browser</small></div><span class="package-status">In live image</span></div>
+          <div class="package-row"><div><strong>Synaptic</strong><small>Ubuntu package manager · synaptic</small></div><span class="package-status">In live image</span></div>
+          <div class="package-row"><div><strong>Nmap</strong><small>Network discovery and auditing · nmap</small></div><span class="package-status">In live image</span></div>
+          <div class="package-row"><div><strong>Wireshark</strong><small>Network protocol analyzer · wireshark</small></div><span class="package-status">In live image</span></div>
+          </div><div class="reality-note">To install software, boot the actual NEXUS ISO and use Synaptic, or run apt in its terminal. Installations in a live session are temporary and disappear after reboot.</div><div class="install-command"><input id="package-name" aria-label="Ubuntu package name" value="nmap" maxlength="64" autocomplete="off"><button class="primary" id="copy-install-command" type="button">Copy apt command</button></div><p class="status" id="package-command-status">Copies a command only; nothing is installed by this preview.</p>`;
         if (name === "editor") return `<div class="toolbar"><button class="primary" id="save-note">Save note</button><span class="muted" id="save-status">Unsaved changes stay in this browser tab.</span></div><textarea class="editor" id="editor-text" spellcheck="false">Welcome to NEXUS OS\n\nThis is an interactive desktop preview. Your edits remain in this page only.\n\nFor the real Ubuntu live OS, launch the ISO in QEMU with Start-NEXUS-OS.bat.</textarea>`;
         if (name === "settings") return `<h2 style="font-size:18px;font-weight:500;margin:0 0 14px">Personalization & system</h2><div class="settings">
           <div class="setting-row"><div><strong>Light appearance</strong><small>Preview a brighter desktop palette</small></div><label class="switch"><input id="light-toggle" type="checkbox"><span class="slider"></span></label></div>
@@ -486,6 +514,43 @@
         });
       }
 
+      function setupSoftware() {
+        const input = document.getElementById("package-name");
+        document.getElementById("copy-install-command").addEventListener("click", async () => {
+          const packageName = input.value.trim();
+          if (!/^[A-Za-z0-9][A-Za-z0-9+.-]{0,63}$/.test(packageName)) {
+            notify("Enter a valid Ubuntu package name.");
+            input.focus();
+            return;
+          }
+          const command = `sudo apt install ${packageName}`;
+          let copied = false;
+          if (navigator.clipboard && window.isSecureContext) {
+            try {
+              await navigator.clipboard.writeText(command);
+              copied = true;
+            } catch {}
+          }
+          if (!copied) {
+            const temporaryInput = document.createElement("textarea");
+            temporaryInput.value = command;
+            temporaryInput.setAttribute("readonly", "");
+            temporaryInput.style.position = "fixed";
+            temporaryInput.style.opacity = "0";
+            document.body.append(temporaryInput);
+            temporaryInput.select();
+            try { copied = document.execCommand("copy"); }
+            catch { copied = false; }
+            finally { temporaryInput.remove(); }
+          }
+          const status = document.getElementById("package-command-status");
+          status.textContent = copied
+            ? `Copied: ${command} · paste it in the real live OS terminal to install.`
+            : `Copy was blocked by this browser. In the real OS terminal, run: ${command}`;
+          notify(copied ? "Install command copied; preview did not install anything." : "Copy blocked. The command is shown below.");
+        });
+      }
+
       function setupEditor() {
         const editor = document.getElementById("editor-text");
         editor.addEventListener("input", () => {
@@ -530,6 +595,8 @@
       document.getElementById("maximize").addEventListener("click", () => win.classList.toggle("maximized"));
       win.addEventListener("pointerdown", () => { win.style.zIndex = ++z; });
       content.addEventListener("click", event => {
+        const launchButton = event.target.closest("[data-launch-app]");
+        if (launchButton) { openApp(launchButton.dataset.launchApp); return; }
         if (event.target.id === "preview-info") notify("Try the Start menu, Files, Text Editor, Settings, and demo terminal.");
       });
       document.addEventListener("keydown", event => {

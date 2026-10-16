@@ -14,7 +14,7 @@ The latest ISO is published as verified download parts on [GitHub Releases](http
 
 ## Browser preview
 
-[Open or download the self-contained NEXUS desktop preview](https://raw.githubusercontent.com/BloxdMini/The-Main-OS/main/nexus-os-preview.html). It includes clickable desktop apps, a draggable window, settings, a local text editor, a demo terminal, external links to Google Play, Apple's App Store, and Microsoft Store, and direct links to the Windows launcher and release. The preview is only an interface simulation: it does not run Linux applications or access your computer's files. Use the QEMU ISO for the real OS.
+[Open or download the self-contained NEXUS desktop preview](https://raw.githubusercontent.com/BloxdMini/The-Main-OS/main/nexus-os-preview.html). It includes clickable desktop apps, a draggable window, settings, a local text editor, a demo terminal, a browser start page, a software guide that can copy an apt command, external links to Google Play, Apple's App Store, and Microsoft Store, and direct links to the Windows launcher and release. These are browser-preview interactions only: it does not run Linux applications, install packages, or access your computer's files. Use the QEMU ISO for the real OS.
 
 ## Building the ISO
 
