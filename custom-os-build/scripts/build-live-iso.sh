@@ -51,7 +51,8 @@ chroot "$CHROOT_DIR" /usr/bin/env DEBIAN_FRONTEND=noninteractive bash -euc '
         linux-generic linux-firmware \
         casper systemd-sysv systemd-resolved network-manager net-tools iproute2 kmod procps sudo \
         vim-tiny nano curl wget git \
-        xserver-xorg lightdm lightdm-gtk-greeter xfce4 xfce4-goodies xfce4-terminal dbus-x11 plymouth \
+        xserver-xorg xserver-xorg-video-all xserver-xorg-input-all \
+        lightdm lightdm-gtk-greeter xfce4 xfce4-goodies xfce4-terminal dbus-x11 plymouth \
         greybird-gtk-theme elementary-xfce-icon-theme fonts-dejavu-core \
         epiphany-browser synaptic policykit-1-gnome \
         pulseaudio alsa-utils openssh-server ufw apparmor apparmor-utils \
@@ -62,7 +63,7 @@ chroot "$CHROOT_DIR" /usr/bin/env DEBIAN_FRONTEND=noninteractive bash -euc '
         ruby perl php lua5.4 lynis firejail
     apt-get clean
 '
-for app in epiphany synaptic-pkexec; do
+for app in epiphany synaptic-pkexec Xorg xfce4-session lightdm-gtk-greeter; do
     if ! chroot "$CHROOT_DIR" /usr/bin/env bash -ec "command -v '$app' >/dev/null"; then
         echo "Required desktop application is missing after package installation: $app" >&2
         exit 1
