@@ -48,7 +48,7 @@ echo "[3/7] Installing desktop and security tools..."
 chroot "$CHROOT_DIR" /usr/bin/env DEBIAN_FRONTEND=noninteractive bash -euc '
     apt-get update
     apt-get install -y --no-install-recommends \
-        linux-generic linux-modules-extra-generic linux-firmware \
+        linux-generic linux-firmware \
         casper systemd-sysv systemd-resolved network-manager net-tools iproute2 kmod procps sudo \
         vim-tiny nano curl wget git \
         xserver-xorg lightdm lightdm-gtk-greeter xfce4 xfce4-goodies xfce4-terminal dbus-x11 plymouth \
