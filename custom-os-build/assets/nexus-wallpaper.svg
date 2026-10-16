@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440" fill="none">
+  <defs>
+    <linearGradient id="base" x1="170" y1="110" x2="2340" y2="1410" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#121922"/>
+      <stop offset=".48" stop-color="#202c39"/>
+      <stop offset="1" stop-color="#111820"/>
+    </linearGradient>
+    <radialGradient id="haze" cx="0" cy="0" r="1" gradientTransform="matrix(1040 680 -700 1070 1780 610)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#516c83" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#263444" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="orbit" x1="708" y1="445" x2="2291" y2="1159" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d4dfeb" stop-opacity=".02"/>
+      <stop offset=".5" stop-color="#c0d0df" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#99aec2" stop-opacity=".025"/>
+    </linearGradient>
+    <radialGradient id="core" cx="0" cy="0" r="1" gradientTransform="matrix(0 431 -431 0 1653 763)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#91a9bf" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#91a9bf" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur" x="471" y="146" width="1960" height="1255" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+  <path fill="url(#base)" d="M0 0h2560v1440H0z"/>
+  <path fill="url(#haze)" d="M0 0h2560v1440H0z"/>
+  <ellipse cx="1653" cy="763" fill="url(#core)" rx="510" ry="470"/>
+  <g filter="url(#blur)" opacity=".35">
+    <ellipse cx="1451" cy="778" stroke="#9eb4c7" stroke-opacity=".19" stroke-width="2" rx="842" ry="315" transform="rotate(-26 1451 778)"/>
+    <ellipse cx="1536" cy="771" stroke="#91a9bf" stroke-opacity=".16" stroke-width="2" rx="624" ry="214" transform="rotate(-26 1536 771)"/>
+  </g>
+  <ellipse cx="1451" cy="778" stroke="url(#orbit)" stroke-width="2" rx="842" ry="315" transform="rotate(-26 1451 778)"/>
+  <ellipse cx="1536" cy="771" stroke="url(#orbit)" stroke-opacity=".78" stroke-width="1.5" rx="624" ry="214" transform="rotate(-26 1536 771)"/>
+  <path d="M1746 218v1004M1080 720h1240" stroke="#d2deea" stroke-opacity=".025"/>
+  <g opacity=".35">
+    <circle cx="1956" cy="414" r="3" fill="#c0cfdd"/>
+    <circle cx="2041" cy="1037" r="2" fill="#c0cfdd"/>
+    <circle cx="1208" cy="1102" r="2" fill="#c0cfdd"/>
+    <circle cx="2220" cy="666" r="2" fill="#c0cfdd"/>
+  </g>
+</svg>

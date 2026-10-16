@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -20,6 +20,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate build scripts
+        run: bash -n custom-os-build/scripts/*.sh
 
       - name: Build ISO builder image
         run: docker build -t nexus-os-builder ./custom-os-build
@@ -43,13 +46,17 @@ jobs:
             -smp 2 \
             -cdrom output/nexus-os.iso \
             -boot d \
-            -nographic \
+            -display vnc=127.0.0.1:0 \
+            -serial file:qemu.log \
+            -monitor none \
             -no-reboot \
-            -no-shutdown > qemu.log 2>&1
+            -no-shutdown > qemu-launch.log 2>&1
           qemu_status=$?
           set -e
-          if ! grep -q "Started Light Display Manager" qemu.log; then
-            tail -n 120 qemu.log
+          sed -E 's/\x1B\[[0-9;]*[[:alpha:]]//g' qemu.log > qemu-clean.log 2>/dev/null || true
+          if ! grep -E -q "Started .*Light Display Manager" qemu-clean.log; then
+            tail -n 120 qemu.log 2>/dev/null || true
+            cat qemu-launch.log
             echo "ISO did not reach the graphical login (QEMU exit: $qemu_status)" >&2
             exit 1
           fi
@@ -64,3 +71,29 @@ jobs:
           if-no-files-found: warn
           compression-level: 0
           retention-days: 7
+
+      - name: Split ISO for release download
+        if: github.ref == 'refs/heads/main'
+        run: |
+          split -b 1800M --numeric-suffixes=0 --suffix-length=2 \
+            output/nexus-os.iso output/nexus-os.iso.part-
+          part_count=$(find output -maxdepth 1 -type f -name 'nexus-os.iso.part-*' | wc -l)
+          sha256sum output/nexus-os.iso | awk -v count="$part_count" '{ print count "\n" $1 }' \
+            > output/nexus-os.iso.parts
+
+      - name: Publish latest downloadable ISO
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view latest >/dev/null 2>&1 || \
+            gh release create latest \
+              --title "NEXUS OS - Latest" \
+              --notes "Rolling download of the latest tested NEXUS OS live ISO." \
+              --latest
+          gh release edit latest --latest
+          while IFS= read -r asset; do
+            gh release delete-asset latest "$asset" --yes
+          done < <(gh release view latest --json assets \
+            --jq '.assets[].name | select(startswith("nexus-os.iso.part-") or . == "nexus-os.iso.parts")')
+          gh release upload latest output/nexus-os.iso.parts output/nexus-os.iso.part-* --clobber

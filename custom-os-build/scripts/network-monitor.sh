@@ -111,14 +111,13 @@ check_network_interfaces() {
 
 check_hidden_processes() {
     echo "[*] Checking for hidden processes..." | tee -a "$LOG_FILE"
-    local ps_count
-    ps_count=$(ps aux | wc -l)
-    local proc_count
-    proc_count=$(ls /proc | grep -E "^[0-9]+$" | wc -l)
-    if [ "$proc_count" -gt "$ps_count" ]; then
-        echo "[!] Possible hidden processes detected!" | tee -a "$LOG_FILE"
-        echo "PS count: $ps_count, /proc count: $proc_count" | tee -a "$LOG_FILE"
-        echo "HIDDEN_PROCESS: ps=$ps_count proc=$proc_count" >> "$ALERT_FILE"
+    local hidden_pids
+    hidden_pids=$(comm -23 \
+        <(find /proc -regextype posix-extended -mindepth 1 -maxdepth 1 -type d -regex '/proc/[0-9]+' -printf '%f\n' | sort -n) \
+        <(ps -e -o pid= | awk '{$1=$1; print}' | sort -n))
+    if [ -n "$hidden_pids" ]; then
+        echo "[!] Possible hidden processes detected: $hidden_pids" | tee -a "$LOG_FILE"
+        echo "HIDDEN_PROCESS: pids=$hidden_pids" >> "$ALERT_FILE"
     fi
 }
 

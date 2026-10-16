@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /build
 
 COPY scripts/ /build/scripts/
+COPY assets/ /build/assets/
 
 RUN chmod +x /build/scripts/*.sh
 

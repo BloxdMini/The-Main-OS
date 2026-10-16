@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10151f">
+  <title>NEXUS OS — Desktop Preview</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --glass: rgba(18, 23, 32, .90);
+      --glass-solid: #171c25;
+      --border: rgba(231, 237, 245, .12);
+      --text: #edf0f5;
+      --muted: #a2aab7;
+      --accent: #8ba5c9;
+      --blue: #8ba5c9;
+      --shadow: 0 24px 72px rgba(0, 0, 0, .48);
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    .icon-library { position:absolute; width:0; height:0; overflow:hidden; }
+    .inline-icon { width:14px; height:14px; vertical-align:-3px; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { color: var(--text); background: #10151f; user-select: none; }
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    .desktop {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 73% 34%, rgba(60, 88, 113, .29), transparent 40%),
+        radial-gradient(ellipse at 29% 75%, rgba(54, 69, 91, .26), transparent 43%),
+        linear-gradient(136deg, #141a23 0%, #202a37 48%, #111720 100%);
+      transition: filter .25s;
+    }
+    .desktop::before, .desktop::after {
+      position: absolute; content: ""; pointer-events: none; border-radius: 50%;
+      filter: blur(1px); transform: rotate(-28deg);
+    }
+    .desktop::before {
+      width: 90vw; height: 38vw; left: 29vw; top: 30vh;
+      border: 1px solid rgba(203, 218, 235, .08);
+      box-shadow: 0 0 120px rgba(78, 109, 137, .08), inset 0 0 110px rgba(80, 106, 132, .06);
+    }
+    .desktop::after {
+      width: 59vw; height: 25vw; left: 48vw; top: 37vh;
+      border: 1px solid rgba(203, 218, 235, .07);
+      box-shadow: 0 0 80px rgba(102, 130, 158, .07);
+    }
+    .topbar {
+      position: absolute; z-index: 5; inset: 0 0 auto; height: 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 17px; background: rgba(14, 18, 25, .78);
+      border-bottom: 1px solid rgba(255,255,255,.055); backdrop-filter: blur(22px);
+      font-size: 12px;
+    }
+    .top-left, .top-right { display: flex; align-items: center; gap: 17px; }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: .09em; }
+    .brand-mark { color: #aebbc9; display:flex; }
+    .brand-mark svg { width:17px; height:17px; }
+    .top-item, .tray-item { color: #e7edf7; opacity: .88; }
+    .top-item { cursor: pointer; }
+    .top-item:hover { color: var(--accent); }
+    .tray { display:flex; align-items:center; gap:12px; }
+    .tray svg, .task-right svg { width: 16px; height: 16px; display:block; }
+    #clock { min-width: 86px; text-align: right; font-variant-numeric: tabular-nums; }
+    .desktop-icons {
+      position: absolute; z-index: 1; top: 58px; left: 13px;
+      display: grid; grid-auto-flow: column; grid-template-rows: repeat(5, 88px);
+      gap: 5px 8px;
+    }
+    .desktop-icon {
+      width: 78px; border: 0; background: transparent; border-radius: 6px;
+      display: flex; flex-direction: column; align-items:center; justify-content:center;
+      gap: 6px; cursor: pointer; text-shadow: 0 1px 3px #000a;
+    }
+    .desktop-icon:hover, .desktop-icon:focus-visible { background: rgba(224,233,243,.11); outline: 1px solid rgba(255,255,255,.10); }
+    .desktop-icon .glyph { width:29px; height:29px; padding:5px; color:#d4dce5; border-radius:6px; background:linear-gradient(145deg,#59697d,#354151); filter:drop-shadow(0 2px 4px #0005); }
+    .desktop-icon[data-app="files"] .glyph { color:#d9c596; background:linear-gradient(145deg,#6f6855,#494436); }
+    .desktop-icon[data-app="terminal"] .glyph { color:#c1cfce; background:linear-gradient(145deg,#52636a,#303d43); }
+    .desktop-icon[data-app="settings"] .glyph { color:#d2d8e1; background:linear-gradient(145deg,#647184,#414a59); }
+    .desktop-icon span:last-child { font-size: 11px; }
+    .welcome {
+      position:absolute; z-index:1; right:28px; bottom:76px;
+      text-align:right; width:min(350px, 65vw); pointer-events:none;
+    }
+    .welcome h1 { font-weight:500; letter-spacing:.17em; font-size:19px; margin:0; color:#d5dce5; }
+    .welcome p { color:rgba(224,232,241,.58); font-size:11px; letter-spacing:.025em; margin:7px 0 0; }
+    .window {
+      position: absolute; z-index: 3; top: 15%; left: 26%; width: min(720px, 76vw);
+      height: min(500px, 65vh); min-width: 320px; min-height: 230px;
+      display:flex; flex-direction:column; overflow:hidden;
+      background: rgba(27, 32, 41, .97); border:1px solid rgba(255,255,255,.13);
+      border-radius:9px; box-shadow:var(--shadow); backdrop-filter:blur(24px);
+    }
+    .window.hidden { display:none; }
+    .window.maximized { inset:49px 10px 60px !important; width:auto !important; height:auto !important; }
+    .titlebar {
+      height:42px; flex:0 0 42px; display:flex; align-items:center; justify-content:space-between;
+      padding:0 12px 0 16px; background:rgba(255,255,255,.025); border-bottom:1px solid var(--border);
+      cursor:move;
+    }
+    .window-title { display:flex; align-items:center; gap:9px; font-size:13px; font-weight:600; }
+    .window-title svg { width:17px; height:17px; color:#c2ccd8; }
+    .window-controls { display:flex; gap:4px; }
+    .window-controls button {
+      width:28px; height:25px; border:0; border-radius:4px; background:transparent;
+      color:#c9d3e2; cursor:pointer;
+    }
+    .window-controls button:hover { background:rgba(255,255,255,.13); }
+    .window-controls .close:hover { background:#d94f62; color:white; }
+    .window-content { flex:1; overflow:auto; padding:18px; user-select:text; }
+    .toolbar { display:flex; align-items:center; gap:9px; margin-bottom:16px; }
+    .toolbutton, .primary {
+      border:1px solid var(--border); border-radius:7px; background:rgba(255,255,255,.07);
+      padding:8px 12px; cursor:pointer;
+    }
+    .toolbutton:hover { background:rgba(255,255,255,.13); }
+    .primary { background:#1d887f; border-color:#35b9a6; color:white; }
+    .primary:hover { background:#23a091; }
+    .address { flex:1; background:rgba(0,0,0,.2); padding:8px 11px; border-radius:6px; color:#cbd8e8; font-size:12px; }
+    .file-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(105px,1fr)); gap:10px; }
+    .file {
+      min-height:90px; border:1px solid transparent; border-radius:8px; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+      background:rgba(255,255,255,.025); font-size:12px; color:#e1e8f2;
+    }
+    .file:hover { border-color:var(--border); background:rgba(255,255,255,.07); }
+    .file svg { width:25px; height:25px; color:#b8c4d1; }
+    .file span:first-child { display:flex; }
+    .store-intro { color:var(--muted); font-size:13px; line-height:1.55; margin:0 0 18px; }
+    .store-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+    .store-card {
+      min-height:170px; display:flex; flex-direction:column; align-items:flex-start;
+      padding:17px; border:1px solid var(--border); border-radius:10px;
+      background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.018));
+    }
+    .store-symbol {
+      width:38px; height:38px; display:grid; place-items:center; border-radius:9px;
+      background:rgba(139,165,201,.16); color:#c5d5e7; font-size:12px; font-weight:700;
+      letter-spacing:.04em; margin-bottom:12px;
+    }
+    .store-card h3 { margin:0; font-size:14px; font-weight:600; }
+    .store-card p { flex:1; margin:6px 0 14px; color:var(--muted); font-size:12px; line-height:1.45; }
+    .store-link { color:#b6cce4; font-size:12px; text-decoration:none; }
+    .store-link:hover { color:#fff; text-decoration:underline; }
+    .terminal {
+      height:100%; min-height:220px; padding:2px; background:#0c111a; color:#c5f6e7;
+      font:13px/1.65 "Cascadia Code", Consolas, monospace;
+    }
+    .terminal-output { white-space:pre-wrap; overflow:auto; max-height:calc(100% - 28px); }
+    .terminal-line { display:flex; gap:8px; }
+    .prompt { color:#64ddc5; }
+    .terminal input { flex:1; border:0; outline:0; background:transparent; color:#e8f3f2; font:inherit; }
+    .editor { width:100%; height:100%; min-height:260px; resize:none; border:0; outline:0; background:transparent; color:#e8edf5; font:14px/1.65 "Cascadia Code",Consolas,monospace; }
+    .settings { display:grid; gap:12px; }
+    .setting-row { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:14px; border:1px solid var(--border); border-radius:9px; background:rgba(255,255,255,.035); }
+    .setting-row small { display:block; color:var(--muted); margin-top:4px; }
+    .switch { width:43px; height:24px; position:relative; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; inset:0; border-radius:20px; background:#515b6a; cursor:pointer; transition:.2s; }
+    .slider::before { content:""; position:absolute; height:18px; width:18px; top:3px; left:3px; background:white; border-radius:50%; transition:.2s; }
+    .switch input:checked + .slider { background:#239b8d; }
+    .switch input:checked + .slider::before { transform:translateX(19px); }
+    .about-card { display:flex; gap:17px; align-items:center; padding:18px; border-radius:10px; background:linear-gradient(120deg,rgba(43,171,155,.2),rgba(75,115,184,.13)); }
+    .about-logo { color:#b6c5d6; }
+    .about-logo svg { width:42px; height:42px; display:block; }
+    .about-card h2 { margin:0 0 5px; font-weight:500; }
+    .about-card p, .muted { color:var(--muted); font-size:13px; line-height:1.5; }
+    .status { color:var(--muted); font-size:12px; margin-top:14px; }
+    .download-links { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    .download-links a { display:inline-block; text-decoration:none; font-size:13px; }
+    .start-menu {
+      position:absolute; z-index:8; bottom:60px; left:10px; width:min(440px, calc(100vw - 20px));
+      padding:16px; border:1px solid var(--border); border-radius:14px;
+      background:rgba(17,24,37,.94); box-shadow:var(--shadow); backdrop-filter:blur(28px);
+    }
+    .start-menu.hidden { display:none; }
+    .search {
+      width:100%; padding:11px 14px; border:1px solid rgba(255,255,255,.14); border-radius:8px;
+      outline:0; color:var(--text); background:rgba(0,0,0,.2);
+    }
+    .search:focus { border-color:var(--accent); }
+    .menu-heading { margin:17px 5px 9px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.11em; }
+    .app-list { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+    .app-launch {
+      text-align:left; border:0; border-radius:7px; padding:10px; cursor:pointer; background:transparent;
+      display:flex; align-items:center; gap:10px; font-size:13px;
+    }
+    .app-launch:hover { background:rgba(255,255,255,.09); }
+    .app-launch svg { width:20px; height:20px; color:#c1cbd7; }
+    .menu-footer { display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); margin-top:15px; padding:13px 4px 0; color:var(--muted); font-size:12px; }
+    .taskbar {
+      position:absolute; z-index:7; bottom:0; inset-inline:0; height:52px;
+      display:flex; align-items:center; justify-content:center; gap:7px;
+      background:rgba(14,18,25,.90); border-top:1px solid rgba(255,255,255,.08); backdrop-filter:blur(25px);
+    }
+    .taskbar button { border:0; cursor:pointer; }
+    .start-button, .task-app {
+      height:40px; min-width:42px; border-radius:7px; background:transparent;
+      display:flex; align-items:center; justify-content:center; font-size:22px;
+    }
+    .start-button:hover, .task-app:hover, .task-app.active { background:rgba(255,255,255,.1); }
+    .start-button { color:#c3ccd6; }
+    .start-button svg { width:19px; height:19px; }
+    .task-app svg { width:20px; height:20px; color:#c5ced9; }
+    .task-separator { height:25px; width:1px; background:var(--border); margin:0 3px; }
+    .task-right { position:absolute; right:16px; display:flex; gap:13px; align-items:center; color:#c5cdd8; font-size:12px; }
+    .notification {
+      position:absolute; z-index:10; right:18px; bottom:68px; max-width:340px; padding:13px 16px;
+      border:1px solid var(--border); border-radius:10px; background:var(--glass-solid); box-shadow:var(--shadow);
+      font-size:13px; animation:pop .18s ease-out;
+    }
+    @keyframes pop { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+    .offline {
+      position:absolute; z-index:2; top:54px; right:14px; border:1px solid rgba(255,255,255,.1);
+      border-radius:4px; padding:6px 9px; background:rgba(12,16,22,.55); color:#bbc5d1; font-size:9px; letter-spacing:.035em;
+    }
+    body.light .desktop { filter:brightness(1.32) saturate(.82); }
+    body.light { color-scheme:light; }
+    @media (max-width:650px) {
+      .topbar { padding:0 10px; } .top-left { gap:10px; } .top-item:nth-child(n+3) { display:none; }
+      .desktop-icons { grid-template-rows:repeat(6,78px); left:8px; top:52px; }
+      .desktop-icon { width:65px; } .welcome { bottom:72px; right:14px; }
+      .window { left:5% !important; top:11% !important; width:90% !important; height:76% !important; min-width:0; }
+      .task-right { right:9px; } .task-right .tray-item:first-child { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <svg class="icon-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-nexus" viewBox="0 0 512 512"><path d="M159 22h194l137 137v194L353 490H159L22 353V159L159 22Z" fill="#182331" stroke="currentColor" stroke-opacity=".55" stroke-width="8"/><path d="M123 356V156h59l144 135V156h63v200h-57L186 219v137h-63Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="23"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h5l2 2H19a2 2 0 0 1 2 2v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5v-12Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3.5 9h17" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m7 9 3 3-3 3m6 0h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-editor" viewBox="0 0 24 24"><path d="M6 3.8h8l4 4v12.4H6a2 2 0 0 1-2-2V5.8a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4v4h4M8 12h7m-7 3h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="m14 18 5.5-5.5 2 2L16 20h-2v-2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m19.2 13.8 1.1.9-1.8 3.1-1.4-.5a7.8 7.8 0 0 1-1.6.9l-.3 1.5h-3.6l-.3-1.5a7.8 7.8 0 0 1-1.6-.9l-1.4.5-1.8-3.1 1.1-.9a7.7 7.7 0 0 1 0-1.8l-1.1-.9 1.8-3.1 1.4.5a7.8 7.8 0 0 1 1.6-.9l.3-1.5h3.6l.3 1.5a7.8 7.8 0 0 1 1.6.9l1.4-.5 1.8 3.1-1.1.9a7.7 7.7 0 0 1 0 1.8Z" transform="translate(-.2 -1.6) scale(.94)" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9h16l-1 11H5L4 9Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 9a4 4 0 0 1 8 0M9 13h.01m6-.01h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-about" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5m0-8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4v13H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4v4h4M8 12h7m-7 3h7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-network" viewBox="0 0 24 24"><path d="M3 9a13 13 0 0 1 18 0M6.5 12.5a8 8 0 0 1 11 0M10 16a3 3 0 0 1 4 0m-2 3h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4Zm12-1a5 5 0 0 1 0 6m2-9a9 9 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v9m-5.7-5a8 8 0 1 0 11.4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 7V5h6v2m-6 5h6m-3-2v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  </svg>
+  <main class="desktop" id="desktop">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="brand"><span class="brand-mark"><svg><use href="#i-nexus"></use></svg></span><span>NEXUS</span></div>
+        <span class="top-item" data-app="files">Places</span>
+        <span class="top-item" data-app="terminal">Terminal</span>
+        <span class="top-item" data-app="about">System</span>
+      </div>
+      <div class="top-right">
+        <span class="tray"><span class="tray-item" title="Network"><svg><use href="#i-network"></use></svg></span><span class="tray-item" title="Volume"><svg><use href="#i-volume"></use></svg></span><span class="tray-item" title="Power"><svg><use href="#i-power"></use></svg></span></span>
+        <span id="clock"></span>
+      </div>
+    </header>
+
+    <section class="desktop-icons" aria-label="Desktop shortcuts">
+      <button class="desktop-icon" data-app="files"><svg class="glyph"><use href="#i-folder"></use></svg><span>Files</span></button>
+      <button class="desktop-icon" data-app="terminal"><svg class="glyph"><use href="#i-terminal"></use></svg><span>Terminal</span></button>
+      <button class="desktop-icon" data-app="editor"><svg class="glyph"><use href="#i-editor"></use></svg><span>Text Editor</span></button>
+      <button class="desktop-icon" data-app="settings"><svg class="glyph"><use href="#i-settings"></use></svg><span>Settings</span></button>
+      <button class="desktop-icon" data-app="stores"><svg class="glyph"><use href="#i-store"></use></svg><span>App Stores</span></button>
+      <button class="desktop-icon" data-app="about"><svg class="glyph"><use href="#i-about"></use></svg><span>About NEXUS</span></button>
+    </section>
+
+    <div class="welcome">
+      <h1>NEXUS OS</h1>
+      <p>A focused workspace for building, exploring, and securing.</p>
+    </div>
+    <div class="offline">INTERACTIVE PREVIEW · RUNS LOCALLY · DOWNLOAD LINKS NEED INTERNET</div>
+
+    <section class="window hidden" id="app-window" aria-label="Application window">
+      <div class="titlebar" id="titlebar">
+        <div class="window-title"><svg id="window-icon"><use href="#i-folder"></use></svg><span id="window-title">Files</span></div>
+        <div class="window-controls">
+          <button type="button" id="minimize" title="Minimize">—</button>
+          <button type="button" id="maximize" title="Maximize">□</button>
+          <button type="button" class="close" id="close" title="Close">×</button>
+        </div>
+      </div>
+      <div class="window-content" id="window-content"></div>
+    </section>
+
+    <section class="start-menu hidden" id="start-menu">
+      <input class="search" id="app-search" placeholder="Search apps and settings" autocomplete="off">
+      <div class="menu-heading">Pinned applications</div>
+      <div class="app-list" id="app-list"></div>
+      <div class="menu-footer"><span><svg class="inline-icon"><use href="#i-nexus"></use></svg> &nbsp; NEXUS Live Session</span><span>● &nbsp; nexus</span></div>
+    </section>
+
+    <div class="taskbar">
+      <button class="start-button" id="start-button" aria-label="Open applications"><svg><use href="#i-nexus"></use></svg></button>
+      <span class="task-separator"></span>
+      <button class="task-app" data-app="files" title="Files"><svg><use href="#i-folder"></use></svg></button>
+      <button class="task-app" data-app="terminal" title="Terminal"><svg><use href="#i-terminal"></use></svg></button>
+      <button class="task-app" data-app="editor" title="Text Editor"><svg><use href="#i-editor"></use></svg></button>
+      <button class="task-app" data-app="settings" title="Settings"><svg><use href="#i-settings"></use></svg></button>
+      <button class="task-app" data-app="stores" title="App Stores"><svg><use href="#i-store"></use></svg></button>
+      <div class="task-right"><span class="tray-item" title="Network"><svg><use href="#i-network"></use></svg></span><span class="tray-item" title="Volume"><svg><use href="#i-volume"></use></svg></span><span class="tray-item" title="Battery"><svg><use href="#i-battery"></use></svg></span></div>
+    </div>
+    <div id="toast" class="notification" hidden></div>
+  </main>
+  <script>
+    (() => {
+      const apps = {
+        files: { title: "File Manager", icon: "folder" },
+        terminal: { title: "Terminal", icon: "terminal" },
+        editor: { title: "Text Editor", icon: "editor" },
+        settings: { title: "Settings", icon: "settings" },
+        stores: { title: "App Stores", icon: "store" },
+        about: { title: "About NEXUS OS", icon: "about" }
+      };
+      const win = document.getElementById("app-window");
+      const content = document.getElementById("window-content");
+      const menu = document.getElementById("start-menu");
+      const appList = document.getElementById("app-list");
+      const previewFiles = {
+        "/home/nexus": [
+          { name: "Documents", type: "folder" }, { name: "Downloads", type: "folder" },
+          { name: "Pictures", type: "folder" }, { name: "Desktop", type: "folder" },
+          { name: "network-monitor", type: "file" }, { name: "nexus-hardening", type: "file" },
+          { name: "tor-routing", type: "file" }, { name: "Read Me.txt", type: "file" }
+        ],
+        "/home/nexus/Documents": [{ name: "Welcome.txt", type: "file" }],
+        "/home/nexus/Downloads": [],
+        "/home/nexus/Pictures": [],
+        "/home/nexus/Desktop": [{ name: "NEXUS OS Preview", type: "file" }]
+      };
+      let fileHistory = ["/home/nexus"];
+      let fileHistoryIndex = 0;
+      let z = 4;
+      let toastTimer;
+
+      function icon(name, className = "") {
+        return `<svg class="${className}" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
+      }
+
+      function notify(text) {
+        const toast = document.getElementById("toast");
+        toast.textContent = text;
+        toast.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { toast.hidden = true; }, 2800);
+      }
+
+      function openApp(name) {
+        const app = apps[name];
+        if (!app) return;
+        menu.classList.add("hidden");
+        win.classList.remove("hidden");
+        win.style.zIndex = ++z;
+        document.getElementById("window-title").textContent = app.title;
+        document.getElementById("window-icon").innerHTML = `<use href="#i-${app.icon}"></use>`;
+        document.querySelectorAll(".task-app").forEach(button =>
+          button.classList.toggle("active", button.dataset.app === name));
+        content.innerHTML = appContent(name);
+        if (name === "files") setupFiles();
+        if (name === "terminal") setupTerminal();
+        if (name === "settings") setupSettings();
+        if (name === "editor") setupEditor();
+      }
+
+      function appContent(name) {
+        if (name === "files") return `
+          <div class="toolbar"><button class="toolbutton" id="back" title="Back">‹</button><button class="toolbutton" id="forward" title="Forward">›</button><div class="address">/home/nexus</div><button class="toolbutton" id="new-folder">＋ New folder</button></div>
+          <div class="file-grid" id="file-grid"></div><div class="status" id="file-status"></div>`;
+        if (name === "terminal") return `<div class="terminal"><div class="terminal-output" id="terminal-output">NEXUS Terminal · Preview shell (simulated)<br>Type <b>help</b> to see available demo commands.<br><br></div><label class="terminal-line"><span class="prompt">nexus@nexus:~$</span><input id="terminal-input" autocomplete="off" spellcheck="false" autofocus></label></div>`;
+        if (name === "editor") return `<div class="toolbar"><button class="primary" id="save-note">Save note</button><span class="muted" id="save-status">Unsaved changes stay in this browser tab.</span></div><textarea class="editor" id="editor-text" spellcheck="false">Welcome to NEXUS OS\n\nThis is an interactive desktop preview. Your edits remain in this page only.\n\nFor the real Ubuntu live OS, launch the ISO in QEMU with Start-NEXUS-OS.bat.</textarea>`;
+        if (name === "settings") return `<h2 style="font-size:18px;font-weight:500;margin:0 0 14px">Personalization & system</h2><div class="settings">
+          <div class="setting-row"><div><strong>Light appearance</strong><small>Preview a brighter desktop palette</small></div><label class="switch"><input id="light-toggle" type="checkbox"><span class="slider"></span></label></div>
+          <div class="setting-row"><div><strong>Sound</strong><small>Audio in this preview is not connected</small></div><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          <div class="setting-row"><div><strong>Network</strong><small>Preview state: connected · system actions are simulated</small></div><span style="color:var(--accent)">● Online</span></div>
+          <div class="setting-row"><div><strong>Live session</strong><small>Changes are temporary, like a live boot</small></div><span>Ubuntu 24.04 · AMD64</span></div>
+          <button class="toolbutton" id="reset-settings">Restore default appearance</button></div>`;
+        if (name === "stores") return `<h2 style="font-size:18px;font-weight:500;margin:0 0 8px">App stores</h2><p class="store-intro">Browse the official app catalogs below. These open in a new browser tab; they are external links, not an in-OS installer. Availability and installation depend on your device and account.</p><div class="store-grid">
+          <article class="store-card"><div class="store-symbol" aria-hidden="true">GP</div><h3>Google Play</h3><p>Apps, games, books, and more for Android devices.</p><a class="store-link" href="https://play.google.com/store" target="_blank" rel="noopener noreferrer">Open Google Play ↗</a></article>
+          <article class="store-card"><div class="store-symbol" aria-hidden="true">A</div><h3>Apple App Store</h3><p>Discover apps and games for iPhone, iPad, and other Apple devices.</p><a class="store-link" href="https://www.apple.com/app-store/" target="_blank" rel="noopener noreferrer">Open the App Store ↗</a></article>
+          <article class="store-card"><div class="store-symbol" aria-hidden="true">MS</div><h3>Microsoft Store</h3><p>Explore apps, games, and entertainment for Windows.</p><a class="store-link" href="https://apps.microsoft.com/" target="_blank" rel="noopener noreferrer">Open Microsoft Store ↗</a></article>
+          </div>`;
+        return `<div class="about-card"><div class="about-logo">${icon("nexus")}</div><div><h2>NEXUS OS</h2><div>Ubuntu 24.04 · XFCE Live Desktop</div><p>A live environment for authorized security testing, software development, and learning.</p></div></div><h3 style="font-weight:500;margin:22px 0 7px">Get the real OS</h3><p class="muted">Download the Windows launcher and run it to fetch the latest tested ISO and start QEMU. No Git checkout is needed.</p><div class="download-links"><a class="primary" href="https://raw.githubusercontent.com/BloxdMini/The-Main-OS/main/Start-NEXUS-OS.bat" target="_blank" rel="noopener">Download Windows launcher</a><a class="toolbutton" href="https://github.com/BloxdMini/The-Main-OS/releases/latest" target="_blank" rel="noopener">Latest ISO release</a></div><h3 style="font-weight:500;margin:22px 0 7px">About this preview</h3><p class="muted">This standalone page demonstrates a desktop-like interface. It does not run Linux programs, access your files, or change your computer. For the real OS, download the ISO and run it in QEMU.</p><button class="primary" id="preview-info">What can this preview do?</button>`;
+      }
+
+      function setupTerminal() {
+        const input = document.getElementById("terminal-input");
+        const output = document.getElementById("terminal-output");
+        input.focus();
+        input.addEventListener("keydown", event => {
+          if (event.key !== "Enter") return;
+          const command = input.value.trim();
+          const safe = command.replace(/[&<>"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[char]));
+          let result = "";
+          if (command === "help") result = "help · neofetch · ls · pwd · date · whoami · ip addr · network-monitor · tor-check · clear";
+          else if (command === "neofetch") result = "       ◈  NEXUS OS\n    Ubuntu 24.04 · XFCE\n    Kernel: Linux (preview)\n    Shell: simulated demo shell\n    Session: Live · AMD64";
+          else if (command === "ls") result = "Desktop  Documents  Downloads  Pictures  network-monitor  nexus-hardening  tor-routing";
+          else if (command === "pwd") result = "/home/nexus";
+          else if (command === "whoami") result = "nexus";
+          else if (command === "date") result = new Date().toString();
+          else if (command === "ip addr") result = "lo: <LOOPBACK,UP> 127.0.0.1/8\nenp0s3: <BROADCAST,MULTICAST,UP> 192.168.122.20/24 (simulated)";
+          else if (command === "network-monitor") result = "[preview] Network monitor launched. No host or network scanning is performed.";
+          else if (command === "tor-check") result = "[preview] Tor is not connected in this browser simulation. Run tor-routing inside the live OS.";
+          else if (command === "clear") { output.textContent = ""; input.value = ""; return; }
+          else if (command) result = `Command not available in preview: ${safe}\nTry "help".`;
+          output.textContent += `nexus@nexus:~$ ${safe}\n${result}\n\n`;
+          input.value = "";
+          output.scrollTop = output.scrollHeight;
+        });
+      }
+
+      function setupFiles() {
+        const address = content.querySelector(".address");
+        const grid = document.getElementById("file-grid");
+        const status = document.getElementById("file-status");
+
+        function renderFiles() {
+          const path = fileHistory[fileHistoryIndex];
+          address.textContent = path;
+          grid.replaceChildren();
+          const entries = previewFiles[path] || [];
+          entries.forEach(entry => {
+            const button = document.createElement("button");
+            button.className = "file";
+            const fileIcon = document.createElement("span");
+            fileIcon.innerHTML = icon(entry.type === "folder" ? "folder" : "file");
+            const label = document.createElement("span");
+            label.textContent = entry.name;
+            button.append(fileIcon, label);
+            button.addEventListener("click", () => {
+              if (entry.type === "folder") {
+                const nextPath = `${path}/${entry.name}`;
+                if (!previewFiles[nextPath]) previewFiles[nextPath] = [];
+                fileHistory = fileHistory.slice(0, fileHistoryIndex + 1);
+                fileHistory.push(nextPath);
+                fileHistoryIndex++;
+                renderFiles();
+              } else {
+                notify(`${entry.name}: preview file. Nothing on your computer is opened.`);
+              }
+            });
+            grid.append(button);
+          });
+          status.textContent = `${entries.length} item${entries.length === 1 ? "" : "s"} · Virtual preview filesystem`;
+          document.getElementById("back").disabled = fileHistoryIndex === 0;
+          document.getElementById("forward").disabled = fileHistoryIndex >= fileHistory.length - 1;
+        }
+
+        document.getElementById("back").addEventListener("click", () => {
+          if (fileHistoryIndex > 0) { fileHistoryIndex--; renderFiles(); }
+        });
+        document.getElementById("forward").addEventListener("click", () => {
+          if (fileHistoryIndex < fileHistory.length - 1) { fileHistoryIndex++; renderFiles(); }
+        });
+        document.getElementById("new-folder").addEventListener("click", () => {
+          const name = window.prompt("Name this preview folder:");
+          if (name === null) return;
+          const cleanName = name.trim();
+          if (!cleanName || /[\/\\]/.test(cleanName)) {
+            notify("Enter a folder name without path separators.");
+            return;
+          }
+          const path = fileHistory[fileHistoryIndex];
+          const entries = previewFiles[path];
+          if (entries.some(entry => entry.name.toLowerCase() === cleanName.toLowerCase())) {
+            notify("An item with that name already exists.");
+            return;
+          }
+          entries.push({ name: cleanName, type: "folder" });
+          previewFiles[`${path}/${cleanName}`] = [];
+          renderFiles();
+          notify(`Created ${cleanName} in the virtual preview.`);
+        });
+        renderFiles();
+      }
+
+      function setupSettings() {
+        document.getElementById("light-toggle").addEventListener("change", event =>
+          document.body.classList.toggle("light", event.target.checked));
+        document.getElementById("reset-settings").addEventListener("click", () => {
+          document.body.classList.remove("light");
+          document.getElementById("light-toggle").checked = false;
+          notify("Default appearance restored.");
+        });
+      }
+
+      function setupEditor() {
+        const editor = document.getElementById("editor-text");
+        editor.addEventListener("input", () => {
+          document.getElementById("save-status").textContent = "Unsaved changes";
+        });
+        document.getElementById("save-note").addEventListener("click", () => {
+          try {
+            localStorage.setItem("nexus-preview-note", editor.value);
+            document.getElementById("save-status").textContent = "Saved in this browser";
+            notify("Note saved locally in this browser.");
+          } catch {
+            notify("Browser storage is unavailable; the note remains in this page.");
+          }
+        });
+        try {
+          const saved = localStorage.getItem("nexus-preview-note");
+          if (saved !== null) editor.value = saved;
+        } catch { /* Keep the built-in sample text when storage is unavailable. */ }
+      }
+
+      function buildMenu(filter = "") {
+        appList.innerHTML = "";
+        Object.entries(apps).filter(([key, app]) =>
+          `${key} ${app.title}`.toLowerCase().includes(filter.toLowerCase())).forEach(([key, app]) => {
+            const button = document.createElement("button");
+            button.className = "app-launch";
+            button.innerHTML = `${icon(app.icon)}<span>${app.title}</span>`;
+            button.addEventListener("click", () => openApp(key));
+            appList.append(button);
+          });
+      }
+
+      document.querySelectorAll("[data-app]").forEach(button =>
+        button.addEventListener("click", () => openApp(button.dataset.app)));
+      document.getElementById("start-button").addEventListener("click", () => {
+        menu.classList.toggle("hidden");
+        if (!menu.classList.contains("hidden")) document.getElementById("app-search").focus();
+      });
+      document.getElementById("app-search").addEventListener("input", event => buildMenu(event.target.value));
+      document.getElementById("close").addEventListener("click", () => win.classList.add("hidden"));
+      document.getElementById("minimize").addEventListener("click", () => win.classList.add("hidden"));
+      document.getElementById("maximize").addEventListener("click", () => win.classList.toggle("maximized"));
+      win.addEventListener("pointerdown", () => { win.style.zIndex = ++z; });
+      content.addEventListener("click", event => {
+        if (event.target.id === "preview-info") notify("Try the Start menu, Files, Text Editor, Settings, and demo terminal.");
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") { menu.classList.add("hidden"); win.classList.add("hidden"); }
+        if ((event.ctrlKey || event.metaKey) && event.code === "Space") {
+          event.preventDefault(); menu.classList.toggle("hidden");
+        }
+      });
+
+      const titlebar = document.getElementById("titlebar");
+      titlebar.addEventListener("pointerdown", event => {
+        if (event.target.closest("button") || win.classList.contains("maximized")) return;
+        const rect = win.getBoundingClientRect();
+        const dx = event.clientX - rect.left, dy = event.clientY - rect.top;
+        titlebar.setPointerCapture(event.pointerId);
+        const move = moveEvent => {
+          win.style.left = `${Math.max(0, moveEvent.clientX - dx)}px`;
+          win.style.top = `${Math.max(40, moveEvent.clientY - dy)}px`;
+        };
+        const done = () => {
+          titlebar.removeEventListener("pointermove", move);
+          titlebar.removeEventListener("pointerup", done);
+          titlebar.removeEventListener("pointercancel", done);
+        };
+        titlebar.addEventListener("pointermove", move);
+        titlebar.addEventListener("pointerup", done);
+        titlebar.addEventListener("pointercancel", done);
+      });
+
+      function updateClock() {
+        document.getElementById("clock").textContent = new Intl.DateTimeFormat(undefined, {
+          weekday:"short", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"
+        }).format(new Date());
+      }
+      buildMenu();
+      updateClock();
+      setInterval(updateClock, 15000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">NEXUS OS mark</title>
+  <desc id="desc">Original NEXUS geometric N inside a dark octagonal field.</desc>
+  <defs>
+    <linearGradient id="field" x1="70" y1="34" x2="440" y2="478" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#24344a"/>
+      <stop offset="1" stop-color="#111a27"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="110" y1="82" x2="404" y2="431" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#dce5ee"/>
+      <stop offset=".48" stop-color="#8398b1"/>
+      <stop offset="1" stop-color="#536b86"/>
+    </linearGradient>
+  </defs>
+  <path d="M159 22h194l137 137v194L353 490H159L22 353V159L159 22Z" fill="url(#field)" stroke="#8398b1" stroke-opacity=".45" stroke-width="4"/>
+  <path d="M123 356V156h59l144 135V156h63v200h-57L186 219v137h-63Z" fill="none" stroke="url(#edge)" stroke-linejoin="round" stroke-width="23"/>
+  <path d="M204 176v156m103-156v156" fill="none" stroke="#b9c8d9" stroke-linecap="round" stroke-opacity=".54" stroke-width="5"/>
+</svg>
