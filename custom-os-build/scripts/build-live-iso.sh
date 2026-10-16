@@ -177,6 +177,47 @@ autologin-user-timeout=0
 greeter-session=lightdm-gtk-greeter
 LIGHTDM
 
+cat > "$CHROOT_DIR/usr/local/sbin/nexus-boot-diagnostics" <<'DIAGNOSTICS'
+#!/usr/bin/env bash
+echo "=== NEXUS graphical boot diagnostics ==="
+systemctl --no-pager --full status lightdm.service || true
+journalctl -b --no-pager -u lightdm.service -n 80 || true
+for log in /var/log/lightdm/lightdm.log /var/log/lightdm/x-0.log /var/log/Xorg.0.log; do
+    if [[ -f "$log" ]]; then
+        echo "=== $log ==="
+        tail -n 100 "$log"
+    fi
+done
+echo "=== End NEXUS graphical boot diagnostics ==="
+DIAGNOSTICS
+chmod 0755 "$CHROOT_DIR/usr/local/sbin/nexus-boot-diagnostics"
+cat > "$CHROOT_DIR/etc/systemd/system/nexus-boot-diagnostics.service" <<'DIAGNOSTICS_SERVICE'
+[Unit]
+Description=Print graphical boot diagnostics to the serial console
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nexus-boot-diagnostics
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/ttyS0
+TTYReset=no
+TTYVHangup=no
+TTYVTDisallocate=no
+DIAGNOSTICS_SERVICE
+cat > "$CHROOT_DIR/etc/systemd/system/nexus-boot-diagnostics.timer" <<'DIAGNOSTICS_TIMER'
+[Unit]
+Description=Collect graphical boot diagnostics after startup
+
+[Timer]
+OnBootSec=90s
+AccuracySec=1s
+Unit=nexus-boot-diagnostics.service
+
+[Install]
+WantedBy=timers.target
+DIAGNOSTICS_TIMER
+
 install -m 0755 "$(dirname "$0")/network-monitor.sh" "$CHROOT_DIR/usr/local/bin/network-monitor"
 install -m 0755 "$(dirname "$0")/security-hardening.sh" "$CHROOT_DIR/usr/local/bin/nexus-hardening"
 install -m 0755 "$(dirname "$0")/tor-routing.sh" "$CHROOT_DIR/usr/local/bin/tor-routing"
@@ -258,7 +299,7 @@ XFCE_SETTINGS
 
 systemctl --root="$CHROOT_DIR" enable \
     lightdm.service NetworkManager.service systemd-resolved.service \
-    apt-daily.timer apt-daily-upgrade.timer
+    apt-daily.timer apt-daily-upgrade.timer nexus-boot-diagnostics.timer
 
 echo "[5/7] Preparing live boot files..."
 kernel=$(find "$CHROOT_DIR/boot" -maxdepth 1 -type f -name 'vmlinuz-*' -print | sort -V | tail -n 1)
