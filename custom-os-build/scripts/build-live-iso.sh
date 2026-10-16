@@ -5,10 +5,12 @@ BUILD_DIR="${BUILD_DIR:-/build}"
 OUTPUT_DIR="${OUTPUT_DIR:-/output}"
 CHROOT_DIR="$BUILD_DIR/chroot"
 ISO_DIR="$BUILD_DIR/iso"
+CASPER_DIR="$ISO_DIR/casper"
+BOOT_DIR="$ISO_DIR/boot/grub"
 
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
 rm -rf "$CHROOT_DIR" "$ISO_DIR"
-mkdir -p "$CHROOT_DIR" "$ISO_DIR/casper" "$ISO_DIR/boot/grub"
+mkdir -p "$CHROOT_DIR" "$CASPER_DIR" "$BOOT_DIR"
 
 cleanup_mounts() {
     local mount_point
@@ -85,14 +87,18 @@ if [[ -z "$kernel" || -z "$initrd" ]]; then
     echo "Kernel or initrd was not installed" >&2
     exit 1
 fi
-cp "$kernel" "$ISO_DIR/casper/vmlinuz"
-cp "$initrd" "$ISO_DIR/casper/initrd"
+cp "$kernel" "$CASPER_DIR/vmlinuz"
+cp "$initrd" "$CASPER_DIR/initrd"
 
 cleanup_mounts
-mksquashfs "$CHROOT_DIR" "$ISO_DIR/casper/filesystem.squashfs" -comp xz -noappend
-du -sx --block-size=1 "$CHROOT_DIR" | cut -f1 > "$ISO_DIR/casper/filesystem.size"
+mksquashfs "$CHROOT_DIR" "$CASPER_DIR/filesystem.squashfs" -comp xz -noappend
+if [[ ! -s "$CASPER_DIR/filesystem.squashfs" ]]; then
+    echo "Casper live root filesystem was not created" >&2
+    exit 1
+fi
+du -sx --block-size=1 "$CHROOT_DIR" | cut -f1 > "$CASPER_DIR/filesystem.size"
 
-cat > "$ISO_DIR/boot/grub/grub.cfg" <<'GRUB'
+cat > "$BOOT_DIR/grub.cfg" <<'GRUB'
 serial --unit=0 --speed=115200
 terminal_input serial
 terminal_output serial
@@ -100,7 +106,7 @@ set timeout=5
 set default=0
 
 menuentry "NEXUS OS (live)" {
-    linux /casper/vmlinuz boot=casper username=nexus hostname=nexus console=ttyS0,115200n8 systemd.show_status=1 ---
+    linux /casper/vmlinuz boot=casper live quiet splash console=ttyS0,115200n8 systemd.show_status=1 ---
     initrd /casper/initrd
 }
 GRUB
