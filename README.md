@@ -5,10 +5,10 @@ NEXUS OS is an Ubuntu 24.04 live desktop for 64-bit AMD64 PCs. Try its **standal
 ## Windows: download and run in QEMU
 
 1. [Download `Start-NEXUS-OS.bat`](https://raw.githubusercontent.com/BloxdMini/The-Main-OS/main/Start-NEXUS-OS.bat).
-2. Double-click the downloaded batch file. It downloads the latest published ISO into `%LOCALAPPDATA%\NEXUS OS`, installs QEMU via `winget` if needed, and boots the ISO.
+2. Double-click the downloaded batch file. It downloads the latest published ISO into `%LOCALAPPDATA%\NEXUS OS` and starts it with QEMU.
 3. Run `Start-NEXUS-OS.bat --update` to download the newest ISO again.
 
-The launcher requires an internet connection for the initial ISO download. QEMU installation may require confirmation or administrator permission. The guest needs about 4 GB of memory. The live ISO does not install or make changes to your Windows disk.
+The launcher does not request administrator access, install software, or modify system settings. QEMU must already be available; the launcher checks `QEMU_HOME`, a `qemu` folder beside the batch file, common user-local folders, `PATH`, and standard Program Files locations. To keep QEMU user-local, place its Windows build in `%LOCALAPPDATA%\Programs\QEMU`, in the adjacent `qemu` folder, or set `QEMU_HOME` to its folder. The launcher requires an internet connection for the initial ISO download, and the guest needs about 4 GB of memory. The live ISO does not install or make changes to your Windows disk.
 
 The latest ISO is published as verified download parts on [GitHub Releases](https://github.com/BloxdMini/The-Main-OS/releases/latest) after the main-branch build and QEMU boot check succeeds. The launcher reassembles and checksum-verifies them. Downloading the batch file alone does not fetch or run the ISO; run it on Windows to start the setup.
 

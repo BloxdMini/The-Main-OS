@@ -100,6 +100,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference=
 exit /b %errorlevel%
 
 :find_qemu
+if defined QEMU_HOME if exist "%QEMU_HOME%\qemu-system-x86_64.exe" set "QEMU_EXE=%QEMU_HOME%\qemu-system-x86_64.exe"
+if defined QEMU_EXE goto run_qemu
+if exist "%~dp0qemu\qemu-system-x86_64.exe" set "QEMU_EXE=%~dp0qemu\qemu-system-x86_64.exe"
+if defined QEMU_EXE goto run_qemu
+if exist "%LOCALAPPDATA%\Programs\QEMU\qemu-system-x86_64.exe" set "QEMU_EXE=%LOCALAPPDATA%\Programs\QEMU\qemu-system-x86_64.exe"
+if defined QEMU_EXE goto run_qemu
+if exist "%LOCALAPPDATA%\QEMU\qemu-system-x86_64.exe" set "QEMU_EXE=%LOCALAPPDATA%\QEMU\qemu-system-x86_64.exe"
+if defined QEMU_EXE goto run_qemu
 for /f "delims=" %%Q in ('where qemu-system-x86_64.exe 2^>nul') do if not defined QEMU_EXE set "QEMU_EXE=%%Q"
 if defined QEMU_EXE goto run_qemu
 if exist "%ProgramFiles%\qemu\qemu-system-x86_64.exe" set "QEMU_EXE=%ProgramFiles%\qemu\qemu-system-x86_64.exe"
@@ -107,26 +115,14 @@ if defined QEMU_EXE goto run_qemu
 if exist "%ProgramFiles%\QEMU\qemu-system-x86_64.exe" set "QEMU_EXE=%ProgramFiles%\QEMU\qemu-system-x86_64.exe"
 if defined QEMU_EXE goto run_qemu
 
-where winget.exe >nul 2>nul
-if errorlevel 1 (
-  echo QEMU is not installed and Windows Package Manager was not found.
-  echo Install QEMU from https://www.qemu.org/download/ then run this file again.
-  pause
-  exit /b 1
-)
-echo QEMU is missing. Installing it with Windows Package Manager...
-winget.exe install --id SoftwareFreedomConservancy.QEMU --exact --accept-source-agreements --accept-package-agreements --disable-interactivity
-if errorlevel 1 (
-  echo QEMU installation failed. Install QEMU from https://www.qemu.org/download/.
-  pause
-  exit /b 1
-)
-if exist "%ProgramFiles%\qemu\qemu-system-x86_64.exe" set "QEMU_EXE=%ProgramFiles%\qemu\qemu-system-x86_64.exe"
-if not defined QEMU_EXE if exist "%ProgramFiles%\QEMU\qemu-system-x86_64.exe" set "QEMU_EXE=%ProgramFiles%\QEMU\qemu-system-x86_64.exe"
-if not defined QEMU_EXE for /f "delims=" %%Q in ('where qemu-system-x86_64.exe 2^>nul') do if not defined QEMU_EXE set "QEMU_EXE=%%Q"
 if not defined QEMU_EXE (
-  echo QEMU was installed, but qemu-system-x86_64.exe was not found.
-  echo Open a new terminal or add QEMU to PATH, then run this file again.
+  echo QEMU was not found. This launcher does not install software or request administrator access.
+  echo Install or unpack a Windows QEMU build in a user-writable folder, then either:
+  echo   - set QEMU_HOME to that folder,
+  echo   - place it in "%LOCALAPPDATA%\Programs\QEMU", or
+  echo   - place it in a "qemu" folder beside this batch file.
+  echo You can also add qemu-system-x86_64.exe to your PATH.
+  echo QEMU downloads: https://www.qemu.org/download/#windows
   pause
   exit /b 1
 )
