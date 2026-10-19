@@ -85,10 +85,11 @@
     .desktop-icon span:last-child { font-size: 11px; }
     .welcome {
       position:absolute; z-index:1; right:28px; bottom:76px;
-      text-align:right; width:min(350px, 65vw); pointer-events:none;
+      text-align:right; width:min(350px, 65vw); pointer-events:auto;
     }
     .welcome h1 { font-weight:500; letter-spacing:.17em; font-size:19px; margin:0; color:#d5dce5; }
     .welcome p { color:rgba(224,232,241,.58); font-size:11px; letter-spacing:.025em; margin:7px 0 0; }
+    .welcome .launcher-link { display:inline-block; margin-top:12px; text-decoration:none; font-size:12px; text-shadow:none; }
     .window {
       position: absolute; z-index: 3; top: 15%; left: 26%; width: min(720px, 76vw);
       height: min(500px, 65vh); min-width: 320px; min-height: 230px;
@@ -283,6 +284,7 @@
     <div class="welcome">
       <h1>NEXUS OS</h1>
       <p>A focused workspace for building, exploring, and securing.</p>
+      <a class="primary launcher-link" href="https://raw.githubusercontent.com/BloxdMini/The-Main-OS/main/Start-NEXUS-OS.bat" target="_blank" rel="noopener noreferrer" aria-label="Download the Windows QEMU launcher; does not require administrator access">Download Windows QEMU launcher</a>
     </div>
     <div class="offline">INTERACTIVE PREVIEW · RUNS LOCALLY · DOWNLOAD LINKS NEED INTERNET</div>
 
