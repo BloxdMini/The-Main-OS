@@ -69,6 +69,10 @@ for app in epiphany synaptic-pkexec Xorg xfce4-session lightdm-gtk-greeter; do
         exit 1
     fi
 done
+if [[ ! -f "$CHROOT_DIR/usr/share/xsessions/xfce.desktop" ]]; then
+    echo "The XFCE desktop session definition was not installed" >&2
+    exit 1
+fi
 rm -f "$CHROOT_DIR/usr/sbin/policy-rc.d"
 ln -sfn /run/systemd/resolve/stub-resolv.conf "$CHROOT_DIR/etc/resolv.conf"
 
@@ -174,6 +178,8 @@ cat > "$CHROOT_DIR/etc/lightdm/lightdm.conf.d/50-nexus-autologin.conf" <<'LIGHTD
 [Seat:*]
 autologin-user=nexus
 autologin-user-timeout=0
+user-session=xfce
+autologin-session=xfce
 greeter-session=lightdm-gtk-greeter
 LIGHTDM
 
