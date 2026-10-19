@@ -63,7 +63,8 @@ jobs:
           while (( SECONDS < deadline )); do
             sed -E 's/\x1B\[[0-9;]*[[:alpha:]]//g' qemu.log > qemu-clean.log 2>/dev/null || true
             if grep -E -q "Started .*Light Display Manager" qemu-clean.log \
-              && grep -E -q "Reached target .*Graphical Interface" qemu-clean.log; then
+              && grep -E -q "Reached target .*Graphical Interface" qemu-clean.log \
+              && grep -q "NEXUS_DESKTOP_SESSION=running" qemu-clean.log; then
               boot_ready=true
               break
             fi
@@ -76,10 +77,10 @@ jobs:
           if [[ "$boot_ready" != true ]]; then
             tail -n 160 qemu.log 2>/dev/null || true
             cat qemu-launch.log
-            echo "ISO did not reach LightDM and graphical.target within 360 seconds." >&2
+            echo "ISO did not reach a running XFCE session within 360 seconds." >&2
             exit 1
           fi
-          echo "ISO reached LightDM and graphical.target in QEMU."
+          echo "ISO reached LightDM, graphical.target, and a running XFCE session in QEMU."
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4

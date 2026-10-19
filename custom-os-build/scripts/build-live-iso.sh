@@ -177,6 +177,55 @@ autologin-user-timeout=0
 greeter-session=lightdm-gtk-greeter
 LIGHTDM
 
+cat > "$CHROOT_DIR/usr/local/sbin/nexus-boot-diagnostics" <<'DIAGNOSTICS'
+#!/usr/bin/env bash
+if systemctl is-active --quiet lightdm.service && pgrep -u nexus -x xfce4-session >/dev/null; then
+    echo "NEXUS_DESKTOP_SESSION=running"
+    systemctl stop nexus-boot-diagnostics.timer
+    exit 0
+fi
+
+echo "NEXUS_DESKTOP_SESSION=missing"
+systemctl --no-pager --full status lightdm.service || true
+journalctl -b --no-pager -u lightdm.service -n 80 || true
+for log in /var/log/lightdm/lightdm.log /var/log/lightdm/x-0.log /var/log/Xorg.0.log; do
+    if [[ -f "$log" ]]; then
+        echo "=== $log ==="
+        tail -n 100 "$log"
+    fi
+done
+DIAGNOSTICS
+chmod 0755 "$CHROOT_DIR/usr/local/sbin/nexus-boot-diagnostics"
+cat > "$CHROOT_DIR/etc/systemd/system/nexus-boot-diagnostics.service" <<'DIAGNOSTICS_SERVICE'
+[Unit]
+Description=Check NEXUS graphical session and report startup diagnostics
+ConditionPathExists=/dev/ttyS0
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nexus-boot-diagnostics
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/ttyS0
+TTYReset=no
+TTYVHangup=no
+TTYVTDisallocate=no
+DIAGNOSTICS_SERVICE
+cat > "$CHROOT_DIR/etc/systemd/system/nexus-boot-diagnostics.timer" <<'DIAGNOSTICS_TIMER'
+[Unit]
+Description=Check the NEXUS graphical session after startup
+ConditionVirtualization=qemu
+
+[Timer]
+OnBootSec=120s
+OnUnitInactiveSec=30s
+AccuracySec=1s
+Unit=nexus-boot-diagnostics.service
+
+[Install]
+WantedBy=timers.target
+DIAGNOSTICS_TIMER
+
 install -m 0755 "$(dirname "$0")/network-monitor.sh" "$CHROOT_DIR/usr/local/bin/network-monitor"
 install -m 0755 "$(dirname "$0")/security-hardening.sh" "$CHROOT_DIR/usr/local/bin/nexus-hardening"
 install -m 0755 "$(dirname "$0")/tor-routing.sh" "$CHROOT_DIR/usr/local/bin/tor-routing"
@@ -258,7 +307,7 @@ XFCE_SETTINGS
 
 systemctl --root="$CHROOT_DIR" enable \
     lightdm.service NetworkManager.service systemd-resolved.service \
-    apt-daily.timer apt-daily-upgrade.timer
+    apt-daily.timer apt-daily-upgrade.timer nexus-boot-diagnostics.timer
 systemctl --root="$CHROOT_DIR" disable tor.service tor@default.service
 
 echo "[5/7] Preparing live boot files..."
