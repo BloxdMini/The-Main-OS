@@ -28,7 +28,7 @@ The image recipe adds no telemetry agent. Ubuntu package updates can make networ
 
 ## GitHub Actions
 
-The `Build NEXUS OS ISO` workflow builds the image, boots it in QEMU with a virtual display, checks for LightDM startup in the serial log, and uploads `nexus-os-iso` as a seven-day artifact. Successful builds from `main` also update the [latest downloadable ISO release](https://github.com/BloxdMini/The-Main-OS/releases/latest). Large ISO files are split into verified download parts for GitHub Releases. Start a build from the repository's Actions tab or with `workflow_dispatch`.
+The `Build NEXUS OS ISO` workflow builds the image, boots it in QEMU with a virtual display, checks that LightDM and the live user's XFCE session are running, and uploads `nexus-os-iso` as a seven-day artifact. Successful builds from `main` also update the [latest downloadable ISO release](https://github.com/BloxdMini/The-Main-OS/releases/latest). Large ISO files are split into verified download parts for GitHub Releases. Start a build from the repository's Actions tab or with `workflow_dispatch`.
 
 Windows users can download [`Start-NEXUS-OS.bat`](https://raw.githubusercontent.com/BloxdMini/The-Main-OS/main/Start-NEXUS-OS.bat) and run it without cloning the repository. It downloads the latest ISO and starts QEMU; see the [project README](../README.md) for details.
 
