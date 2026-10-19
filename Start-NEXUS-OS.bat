@@ -24,10 +24,13 @@ call :download_file "%RELEASE_URL%.parts" "%MANIFEST_PATH%"
 if errorlevel 1 (
   del "%MANIFEST_PATH%" >nul 2>nul
   echo.
-  echo Download failed. Check your internet connection or whether a tested release is published.
+  echo Could not download the ISO manifest. Check your internet connection and try again.
+  echo If the problem continues, a tested ISO release may not be available yet.
   pause
   exit /b 1
 )
+if not exist "%MANIFEST_PATH%" goto invalid_manifest
+for %%F in ("%MANIFEST_PATH%") do if %%~zF LEQ 0 goto invalid_manifest
 set "PART_COUNT="
 set "EXPECTED_HASH="
 <"%MANIFEST_PATH%" set /p "PART_COUNT="
@@ -92,12 +95,20 @@ exit /b 1
 
 :download_file
 where curl.exe >nul 2>nul
-if not errorlevel 1 (
-  curl.exe --fail --location --retry 3 --retry-delay 2 --output "%~2" "%~1"
-  exit /b %errorlevel%
-)
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri '%~1' -OutFile '%~2'"
-exit /b %errorlevel%
+if errorlevel 1 goto powershell_download
+curl.exe --fail --location --retry 2 --retry-delay 2 --ssl-revoke-best-effort --output "%~2" "%~1"
+if not errorlevel 1 goto validate_download
+echo curl failed; retrying with the built-in Windows downloader...
+del "%~2" >nul 2>nul
+
+:powershell_download
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "try { $ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri '%~1' -OutFile '%~2' -ErrorAction Stop; exit 0 } catch { Write-Error $_; exit 1 }"
+if errorlevel 1 exit /b 1
+
+:validate_download
+if not exist "%~2" exit /b 1
+for %%F in ("%~2") do if %%~zF LEQ 0 exit /b 1
+exit /b 0
 
 :find_qemu
 if defined QEMU_HOME if exist "%QEMU_HOME%\qemu-system-x86_64.exe" set "QEMU_EXE=%QEMU_HOME%\qemu-system-x86_64.exe"
