@@ -24,7 +24,7 @@ The live image is Ubuntu 24.04 Noble for AMD64, using the Ubuntu archive only. I
 
 The app-catalog page opens the official Google Play, Apple App Store, and Microsoft Store websites in the browser. These sites are for browsing; their Android and Windows apps do not install as native Ubuntu applications. Install Ubuntu software with Synaptic or `sudo apt install`. The preinstalled command-line/security set is curated rather than exhaustive: it includes common development runtimes, network diagnostics, packet analysis, and tools such as Nmap, SQLmap, Aircrack-ng, John, Hashcat, Lynis, and Firejail. The Ubuntu, Kali, and Termux command sets are not identical; Windows `cmd.exe` commands do not run natively in this Linux image. Adding Kali rolling repositories or claiming universal command compatibility would make the Ubuntu base less reliable.
 
-The image recipe adds no telemetry agent. Ubuntu package updates can make network requests while the live session is running. `network-monitor` is a local heuristic checker, not proof against spyware or data exfiltration. Tor is opt-in and provides a local SOCKS proxy; only applications explicitly configured to use it go through Tor. A Tor new-identity request does not guarantee a different exit IP.
+The image recipe adds no telemetry agent. Ubuntu package updates can make network requests while the live session is running. `network-monitor` is a local heuristic checker, not proof against spyware or data exfiltration. Tor is disabled at boot. Run `sudo tor-routing` to configure and start its local SOCKS proxy; only applications explicitly configured to use it go through Tor. A Tor new-identity request does not guarantee a different exit IP.
 
 ## GitHub Actions
 
@@ -36,6 +36,6 @@ Windows users can download [`Start-NEXUS-OS.bat`](https://raw.githubusercontent.
 
 - `network-monitor` runs the included network checks.
 - `nexus-hardening` applies system hardening and should only be run after reviewing its system-wide changes.
-- `tor-routing` configures the packaged Tor service and local SOCKS proxy; applications must explicitly use the proxy. It does not run automatically in the live session.
+- `sudo tor-routing` configures and starts the packaged Tor service and local SOCKS proxy; applications must explicitly use the proxy. Tor is disabled by default and does not start automatically in the live session.
 
 This image is for authorized security testing and education. The ISO has a live session and is not an installer.

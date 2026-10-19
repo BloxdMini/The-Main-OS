@@ -259,6 +259,7 @@ XFCE_SETTINGS
 systemctl --root="$CHROOT_DIR" enable \
     lightdm.service NetworkManager.service systemd-resolved.service \
     apt-daily.timer apt-daily-upgrade.timer
+systemctl --root="$CHROOT_DIR" disable tor.service tor@default.service
 
 echo "[5/7] Preparing live boot files..."
 kernel=$(find "$CHROOT_DIR/boot" -maxdepth 1 -type f -name 'vmlinuz-*' -print | sort -V | tail -n 1)
